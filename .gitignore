@@ -1,0 +1,15 @@
+# environment
+env/
+
+# Database
+db.sqlite3
+
+# python files
+__pycache__/
+
+# django files
+*_initial.py
+
+# static files
+media/
+/static
