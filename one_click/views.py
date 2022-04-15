@@ -4,6 +4,9 @@ from store.models import Product
 
 
 def home(request):
+    """
+        Home page of the site, shows available products
+    """
     products = Product.objects.all().filter(is_available=True)
 
     context = {
