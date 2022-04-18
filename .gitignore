@@ -13,3 +13,6 @@ __pycache__/
 # static files
 media/
 /static
+
+launch.json
+.env
