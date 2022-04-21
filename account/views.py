@@ -13,7 +13,11 @@ from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 
 from account.models import Account
+from cart.models import Cart, CartItem
+from cart.views import cart_id
 from .forms import RegistrationForm
+
+import requests
 
 def register(request):
     if request.method == 'POST':
@@ -64,7 +68,44 @@ def login(request):
         user = auth.authenticate(email=email, password=password)
 
         if user:
+            product_variation = []
+            try:
+                cart = Cart.objects.get(cart_id=cart_id(request=request))
+                cart_item = CartItem.objects.filter(cart=cart)
+                for item in cart_item:
+                    variations = item.variations.all()
+                    product_variation.append(list(variations))
+                cart_item = CartItem.objects.filter(user=user)
+                ex_var_list = []
+                id = []
+                for item in cart_item:
+                    existing_variation = item.variations.all()
+                    ex_var_list.append(list(existing_variation))
+                    id.append(item.id)
+
+                for pr in product_variation:
+                    if pr in ex_var_list:
+                        index = ex_var_list.index(pr)
+                        item_id = id[index]
+                        item = CartItem.objects.get(id=item_id)
+                        item.quantity += 1
+                        item.user = user
+                        item.save()
+                    else:
+                        cart_item = CartItem.objects.filter(cart=cart)
+                        if cart_item.exists():
+                            cart_item.update(user=user)
+            except Cart.DoesNotExist:
+                pass
             auth.login(request, user)
+            url = request.META.get('HTTP_REFERER')
+            try:
+                query = requests.utils.urlparse(url).query
+                params = dict(x.split('=') for x in query.split('&'))
+                if 'next' in params:
+                    return redirect(params['next'])
+            except:
+                pass
             # messages.success(request=request, message="You are logged in!")
             return redirect('home')
         else:
