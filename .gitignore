@@ -9,7 +9,11 @@ __pycache__/
 
 # django files
 *_initial.py
+0*_*.py
 
 # static files
 media/
 /static
+
+launch.json
+.env
