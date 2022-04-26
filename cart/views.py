@@ -149,8 +149,10 @@ def cart(request, total=0, quantity=0):
 
 @login_required(login_url='login')
 def checkout(request, total=0, quantity=0):
+    """ renders to the checkout page with some prefilled information about user """
     try:
         cart_items = CartItem.objects.filter(user=request.user)
+        # calculate tax and total amount
         for cart_item in cart_items:
             total += (cart_item.product.price * cart_item.quantity)
             quantity += cart_item.quantity
@@ -162,7 +164,8 @@ def checkout(request, total=0, quantity=0):
             "quantity": quantity,
             "cart_items": cart_items,
             "tax": tax,
-            "grand_total": grand_total
+            "grand_total": grand_total,
+            "user": request.user
         }
     except ObjectDoesNotExist:
         context = {
