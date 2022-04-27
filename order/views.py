@@ -31,10 +31,10 @@ def place_order(request, total=0, quantity=0):
 
         data = Order()
         data.user= current_user
-        data.first_name = current_user['first_name']
-        data.last_name = current_user['last_name']
+        data.first_name = current_user.first_name
+        data.last_name = current_user.last_name
         data.phone = form.cleaned_data['phone']
-        data.email = current_user['email']
+        data.email = current_user.email
         data.address_line_1 = form.cleaned_data['address_line_1']
         data.address_line_2 = form.cleaned_data['address_line_2']
         data.country = form.cleaned_data['country']
@@ -44,7 +44,24 @@ def place_order(request, total=0, quantity=0):
         data.order_total = grand_total
         data.tax = tax
         data.ip = request.META.get('REMOTE_ADDR')
+        data.save()
         data.order_number = generate_order_number(data=data)
         data.save()
+
+        order = Order.objects.get(user=current_user, is_ordered=False, order_number=data.order_number)
+
+        context = {
+            "order": order,
+            "cart_items": cart_items,
+            "total": total,
+            "tax": tax,
+            "grand_total": grand_total
+        }
+
+
         
-        return redirect(to='checkout')
+        return render(request=request, template_name='order/payments.html', context=context)
+
+
+def payments(request):
+    return render(request=request, template_name='order/payments.html')

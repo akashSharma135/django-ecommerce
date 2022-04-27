@@ -8,67 +8,35 @@
     <div class="container">
     
     <!-- ============================ COMPONENT 1 ================================= -->
+    <h4 class="text-center mb-10">Review Your Order!</h4>
         <div class="row">
-            <aside class="col-lg-6">
-        <div class="card">
-            <h4 class="card-title mb-4">Billing Address</h4>
-            <form action="{% url 'place_order' %}" method="post">
-                {% csrf_token %}
-                <div class="form-row">
-                    <div class="col form-group">
-                        <label for="first_name">First Name</label>
-                        <input type="text" name="first_name" id="first_name" class="form-control" readonly value="{{ user.first_name }} "required>
-                    </div>
-                    <div class="col form-group">
-                        <label for="last_name">Last Name</label>
-                        <input type="text" name="last_name" id="last_name" class="form-control" readonly value="{{ user.last_name }}" required>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="col form-group">
-                        <label for="email">Email</label>
-                        <input type="email" name="email" id="email" class="form-control" readonly value="{{ user.email }}" required>
-                    </div>
-                    <div class="col form-group">
-                        <label for="phone">Phone</label>
-                        <input type="number" name="phone" id="phone" class="form-control" required>
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="col form-group">
-                        <label for="address_line_1">Address Line 1</label>
-                        <input type="text" name="address_line_1" id="addres1" class="form-control" required>
-                    </div>
-                    <div class="col form-group">
-                        <label for="address_line_2">Address Line 2</label>
-                        <input type="text" name="address_line_2" id="addres2" class="form-control">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="col form-group">
-                        <label for="city">City</label>
-                        <input type="text" name="city" id="city" class="form-control" required>
-                    </div>
-                    <div class="col form-group">
-                        <label for="state">State</label>
-                        <input type="text" name="state" id="state" class="form-control">
-                    </div>
-                    <div class="col form-group">
-                        <label for="pincode">Pin code</label>
-                        <input type="text" name="pincode" id="pincode" class="form-control">
-                    </div>
-                    <div class="col form-group">
-                        <label for="country">Country</label>
-                        <input type="text" name="country" id="country" class="form-control">
-                    </div>
-                </div>
-            
-        </div> <!-- card.// -->
-        
-            </aside> <!-- col.// -->
-            <aside class="col-lg-6">
-        
+            <aside class="col-lg-8">
                 <div class="card">
+                    <div class="card-header">
+                      Billing Address
+                    </div>
+                    <div class="card-body">
+                      <p class="card-text">{{ order.full_name }}</p>
+                      <p class="card-text">{{ order.full_address }}</p>
+                      <p class="card-text">{{ order.city }}</p>
+                      <p class="card-text">{{ order.state }}</p>
+                      <p class="card-text">{{ order.pincode }}</p>
+                      <p class="card-text">{{ order.email }}</p>
+                      <p class="card-text">{{ order.phone }}</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                      Payment Method
+                    </div>
+                    <div class="card-body">
+                      <p class="card-text">Paypal</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                      Review Products
+                    </div>
                     <div class="card-body">
                         <table class="table table-borderless table-shopping-cart">
                             <thead class="text-muted">
@@ -106,11 +74,32 @@
                                 </tr>
                             {% endfor %}
                             </tbody>
-                        </table>
-                        <button type="submit" name="submit" class="btn btn-primary btn-block"> Checkout </button>
-                        <a href="{% url 'store' %}" class="btn btn-light btn-block">Continue Shopping</a>
+                            </table>
+                    </div>
+                </div>
+            </aside> <!-- col.// -->
+            <aside class="col-lg-4">
+        
+                <div class="card">
+                    <div class="card-body">
+                        <dl class="dlist-align">
+                        <dt>Total price:</dt>
+                        <dd class="text-right">${{ total }}</dd>
+                        </dl>
+                        <dl class="dlist-align">
+                        <dt>Tax:</dt>
+                        <dd class="text-right"> ${{ tax }}</dd>
+                        </dl>
+                        <dl class="dlist-align">
+                        <dt>Total:</dt>
+                        <dd class="text-right text-dark b"><strong>${{ grand_total }}</strong></dd>
+                        </dl>
+                        <hr>
+                        <p class="text-center mb-3">
+                            <img src="{% static './images/misc/payments.png' %}" height="26">
+                        </p>
+                        <a href="{% url 'checkout' %}" class="btn btn-primary btn-block"> Make Payment </a>
                     </div> <!-- card-body.// -->
-                </form>
                 </div> <!-- card.// -->
         
             </aside> <!-- col.// -->
