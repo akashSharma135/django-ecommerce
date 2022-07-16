@@ -8,8 +8,9 @@ from django.views.decorators.csrf import csrf_exempt
 
 from cart.models import CartItem
 from account.models import Account
-from order.models import Order, Payment
+from order.models import Order, OrderProduct, Payment
 from order.utils import generate_order_number
+from store.models import Product
 
 def create_checkout_session(request):
     stripe.api_key = settings.STRIPE_API_KEY
@@ -98,15 +99,11 @@ def create_checkout_session(request):
         ],
         line_items=line_items,
         mode='payment',
-        success_url=request.build_absolute_uri('/order/payment-successful'),
+        success_url=request.build_absolute_uri('/order/payment-successful/') + '?session_id={CHECKOUT_SESSION_ID}',
         cancel_url=request.build_absolute_uri('/cart')
     )
 
     return redirect(session.url)
-
-
-def payment_successful(request):
-    return render(request=request, template_name='order/payment-success.html')
 
 
 @csrf_exempt
@@ -142,7 +139,7 @@ def my_webhook_view(request):
             status=payment_intent.status
         )
         
-        Order.objects.create(
+        order = Order.objects.create(
             user=current_user,
             payment=payment,
             order_number=generate_order_number(data=current_user),
@@ -162,8 +159,50 @@ def my_webhook_view(request):
             ip=request.META.get('REMOTE_ADDR'),
             is_ordered=True
         )
+        # Move the cart item to Order Product Table
+        cart_items = CartItem.objects.filter(user=current_user)
+
+        print("CART_ITEMS: ", cart_items.values())
+
+        for item in cart_items:
+            order_product = OrderProduct()
+            order_product.order_id = order.id
+            order_product.payment = payment
+            order_product.user_id = current_user.id
+            order_product.product_id = item.product_id
+            order_product.quantity = item.quantity
+            order_product.product_price = item.product.price
+            order_product.ordered = True
+
+            order_product.save()
+            order_product.variations.set(item.variations.all())
+
+            # Reduce the quantity of sold products
+            product = Product.objects.get(id=item.product_id)
+            product.stock = product.stock - item.quantity
+            product.save()
+
+        # Clear cart
+        cart_items.delete()
+
+        # Send order received email to customer
+
+        # Send order number and transaction id to payment success page via JsonResponse
+        data = {
+            'order'
+        }
+
     else:
         # TODO: Need to handle more events
         print('Unhandled event type {}'.format(event.type))
 
     return HttpResponse(status=200)
+
+
+def payment_successful(request):
+    print("MBJSNJ: ", request.GET.__dict__)
+    session = stripe.checkout.Session.retrieve(request.GET.get('session_id'))
+    customer = stripe.Customer.retrieve(session.customer)
+    print("SESSION: ", session)
+    print("CUSTOMER: ", customer)
+    return render(request=request, template_name='order/payment-success.html', context={"session": session, "customer": customer})
