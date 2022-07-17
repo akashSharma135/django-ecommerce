@@ -3,7 +3,7 @@
 """
 from django.contrib import admin
 
-from .models import Product, Variation
+from .models import Product, Variation, ReviewRating
 
 class ProductAdmin(admin.ModelAdmin):
     # create slug on basis of product_name
@@ -24,3 +24,5 @@ admin.site.register(
     model_or_iterable=Variation,
     admin_class=VariationAdmin
 )
+
+admin.site.register(ReviewRating)
