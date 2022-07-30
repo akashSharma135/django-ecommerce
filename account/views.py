@@ -16,6 +16,7 @@ from account.models import Account
 from cart.models import Cart, CartItem
 from cart.views import cart_id
 from .forms import RegistrationForm
+from order.models import Order
 
 import requests
 
@@ -175,7 +176,12 @@ def reset_password(request):
 
 @login_required(login_url='login')
 def dashboard(request):
-    return render(request=request, template_name='account/dashboard.html')
+    orders = Order.objects.filter(user_id=request.user.id, is_ordered=True)
+    order_count = orders.count()
+    context = {
+        "order_count": order_count
+    }
+    return render(request=request, template_name='account/dashboard.html', context=context)
 
 
 def forgot_password(request):
@@ -202,3 +208,11 @@ def forgot_password(request):
             messages.success(request=request, message="Account Does not exists!")
             return redirect(to='register')
     return render(request=request, template_name='account/forgot-password.html')
+
+
+def my_orders(request):
+    orders = Order.objects.order_by('-created_at').filter(user_id=request.user.id, is_ordered=True)
+    context = {
+        "orders": orders
+    }
+    return render(request=request, template_name='account/my_orders.html', context=context)
