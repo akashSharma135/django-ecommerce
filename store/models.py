@@ -2,7 +2,6 @@
     models for store app:
         # Product
 """
-from itertools import product
 from django.db import models
 from django.db.models import Avg
 from django.urls import reverse
