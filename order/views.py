@@ -58,19 +58,19 @@ def create_checkout_session(request):
                 'shipping_rate_data': {
                     'type': 'fixed_amount',
                     'fixed_amount': {
-                        'amount': 0,
-                        'currency': 'usd',
+                        'amount': 0,    # TODO: Remove hardcoded value
+                        'currency': 'usd',  # TODO: Remove hardcoded value
                     },
                     'display_name': 'Free shipping',
                     # Delivers between 5-7 business days
                     'delivery_estimate': {
                         'minimum': {
                             'unit': 'business_day',
-                            'value': 5,
+                            'value': 5, # TODO: Remove hardcoded value
                         },
                         'maximum': {
                             'unit': 'business_day',
-                            'value': 7,
+                            'value': 7, # TODO: Remove hardcoded value
                         },
                     }
                 }
@@ -79,7 +79,7 @@ def create_checkout_session(request):
                 'shipping_rate_data': {
                     'type': 'fixed_amount',
                     'fixed_amount': {
-                        'amount': 50,
+                        'amount': 50,   # TODO: Remove hardcoded value
                         'currency': 'usd',
                     },
                     'display_name': 'Next day air',
@@ -87,11 +87,11 @@ def create_checkout_session(request):
                     'delivery_estimate': {
                         'minimum': {
                             'unit': 'business_day',
-                            'value': 1,
+                            'value': 1, # TODO: Remove hardcoded value
                         },
                         'maximum': {
                             'unit': 'business_day',
-                            'value': 1,
+                            'value': 1, # TODO: Remove hardcoded value
                         },
                     }
                 }
@@ -118,7 +118,7 @@ def my_webhook_view(request):
         event = stripe.Event.construct_from(
             json.loads(payload), stripe.api_key
         )
-    except ValueError as e:
+    except ValueError:
         # Invalid payload
         return HttpResponse(status=400)
 
@@ -200,9 +200,10 @@ def my_webhook_view(request):
 
 
 def payment_successful(request):
-    print("MBJSNJ: ", request.GET.__dict__)
     session = stripe.checkout.Session.retrieve(request.GET.get('session_id'))
     customer = stripe.Customer.retrieve(session.customer)
-    print("SESSION: ", session)
-    print("CUSTOMER: ", customer)
-    return render(request=request, template_name='order/payment-success.html', context={"session": session, "customer": customer})
+    return render(
+        request=request,
+        template_name='order/payment-success.html',
+        context={"session": session, "customer": customer}
+    )
